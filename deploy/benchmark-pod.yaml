@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nat464-bench
+  labels:
+    app: nat464-bench
+spec:
+  containers:
+    - name: bench
+      image: networkstatic/iperf3
+      command: ["sleep", "3600"]

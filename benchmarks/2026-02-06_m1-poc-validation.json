@@ -1,0 +1,63 @@
+{
+  "date": "2026-02-06",
+  "label": "M1 PoC Validation",
+  "environment": {
+    "vm": "nat464-dev (Multipass, Ubuntu 24.04)",
+    "k3s": "v1.31.x dual-stack",
+    "sidecar_image": "nat464-sidecar:latest (release build, LTO+strip)",
+    "nginx_image": "nginx:1.27-alpine",
+    "vm_resources": "2 CPU, 4G RAM"
+  },
+  "iterations": 20,
+  "results": {
+    "inbound_latency": {
+      "baseline": {
+        "description": "curl 127.0.0.1:80 (direct to nginx, no sidecar)",
+        "connect_ms": { "p50": 0.06, "p95": 0.09, "p99": 0.09 },
+        "total_ms":   { "p50": 0.18, "p95": 0.49, "p99": 0.49 }
+      },
+      "sidecar": {
+        "description": "curl [::1]:8080 (IPv6 -> sidecar -> 127.0.0.1:80)",
+        "connect_ms": { "p50": 0.07, "p95": 0.14, "p99": 0.14 },
+        "total_ms":   { "p50": 0.26, "p95": 0.66, "p99": 0.66 }
+      },
+      "overhead": {
+        "connect_p50_ms": 0.01,
+        "total_p50_ms": 0.08,
+        "total_p50_pct": 44.4
+      }
+    },
+    "inbound_throughput": {
+      "baseline": {
+        "avg_bytes_per_sec": 2828236,
+        "median_bytes_per_sec": 3554913,
+        "total_bytes": 12300
+      },
+      "sidecar": {
+        "avg_bytes_per_sec": 2298636,
+        "median_bytes_per_sec": 2530864,
+        "total_bytes": 12300
+      },
+      "overhead": {
+        "avg_reduction_pct": 18.7,
+        "median_reduction_pct": 28.8
+      }
+    },
+    "outbound_socks5": {
+      "description": "curl -x socks5h://127.0.0.1:1080 example.com (includes internet RTT)",
+      "connect_ms": { "p50": 0.06, "p95": 0.09, "p99": 0.09 },
+      "total_ms":   { "p50": 288.21, "p95": 307.40, "p99": 307.40 }
+    }
+  },
+  "validation": {
+    "tests_passed": 5,
+    "tests_total": 5,
+    "tests": [
+      "nginx IPv4-only confirmed (0.0.0.0:80 only, direct IPv6 refused)",
+      "inbound IPv6->IPv4 via sidecar (port 8080)",
+      "outbound SOCKS5 to IPv6 peer pod (ipv6-peer-ok)",
+      "outbound SOCKS5 to external (example.com HTTP 200)",
+      "direct IPv6 to nginx:80 refused (sidecar required)"
+    ]
+  }
+}
