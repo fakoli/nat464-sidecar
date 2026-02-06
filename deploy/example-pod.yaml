@@ -1,4 +1,19 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nat464-demo-nginx-conf
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html index.htm;
+        }
+    }
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: nat464-demo
@@ -8,14 +23,18 @@ metadata:
     nat464.io/inject: "true"
 spec:
   containers:
-    # The application container: an unmodified IPv4-only nginx
+    # The application container: an IPv4-only nginx
     - name: app
       image: nginx:1.27-alpine
       ports:
         - containerPort: 80
           protocol: TCP
+      volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
 
-    # The nat464-sidecar: translates IPv6 ↔ IPv4 within the pod
+    # The nat464-sidecar: translates IPv6 <-> IPv4 within the pod
     - name: nat464-sidecar
       image: nat464-sidecar:latest
       args:
@@ -62,3 +81,7 @@ spec:
         capabilities:
           drop:
             - ALL
+  volumes:
+    - name: nginx-conf
+      configMap:
+        name: nat464-demo-nginx-conf

@@ -69,6 +69,19 @@ main.rs → Config (clap)
 - Logging: `tracing` crate with structured fields. Use `debug!` for per-connection events, `info!` for server lifecycle, `error!` for failures.
 - Tests: In-module `#[cfg(test)]` blocks. Network tests bind to port 0 for random port allocation. SOCKS5 tests use `test_pair()` helper to create connected TCP stream pairs.
 
+## Change Tracking
+
+- **CHANGELOG.md** — All major changes organized by milestone
+- **benchmarks/BENCHMARKS.md** — Summary table of performance across sessions
+- **benchmarks/YYYY-MM-DD_label.json** — Raw benchmark data per session
+
+After making changes that affect performance or test coverage:
+1. Run `validate-paths.sh` and `benchmark.sh` on the VM
+2. Save results: `benchmarks/YYYY-MM-DD_description.json`
+3. Append a row to `benchmarks/BENCHMARKS.md`
+4. Update `CHANGELOG.md` under `[Unreleased]`
+5. Sync updated scripts to fakoli-plugins if skills changed
+
 ## Milestones
 
 Currently at **Milestone 1 (PoC)** — TCP-only translation. Planned:
