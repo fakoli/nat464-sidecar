@@ -1,0 +1,25 @@
+[package]
+name = "nat464-sidecar"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "A Rust sidecar for NAT464 translation in IPv6-only Kubernetes clusters"
+repository = "https://github.com/fakoli/nat464-sidecar"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+tokio-util = "0.7"
+anyhow = "1"
+thiserror = "2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
